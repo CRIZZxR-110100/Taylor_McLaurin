@@ -5,8 +5,10 @@ from tkinter import messagebox as msg
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 
+# Variable global, se usa para determinar si existe un grafico en la aplicación
 current_canvas = None
 
+## Funcion para la serie de Taylor y Maclaurin ##
 def serie(x, grado, tipo):
   y = []
 
@@ -73,7 +75,10 @@ def serie(x, grado, tipo):
       y.append(y_temp)
       print(y_temp)
     return y
+  
+  ### Fin de la función ###
 
+## Funcion para el resultado de la función original
 def calcReal(x, tipo):
   y = []
 
@@ -119,13 +124,16 @@ def calcReal(x, tipo):
       y.append(m.log(1+i))
     return y
 
+  ### Fin de la función ###
+
+## Función para dibujar la gráfica de las series de Taylor y Maclaurin
 def setGraph(a_ui, b_ui, n_ui, g1_ui, g2_ui, g3_ui, funcs_ui):
-  global current_canvas  
+  global current_canvas
 
   a, b, n, g1, g2, g3, opc = float(0), float(0), int(0), int(0), int(0), int(0), int(0)
-
   err = 0
 
+  # Cachado de errores
   try:
     if funcs_ui.curselection():
       opc = funcs_ui.curselection()[0]
@@ -149,7 +157,7 @@ def setGraph(a_ui, b_ui, n_ui, g1_ui, g2_ui, g3_ui, funcs_ui):
     return
   
   if opc == 6 and (a <= -1 or b <= -1):
-    tk.messagebox.showerror("Error", "La función ln(1+x) no puede ser evaluada en números negativos")
+    tk.messagebox.showerror("Error", "La función ln(1+x) no puede ser evaluada en números menores o iguales a -1")
     return
   
   # Calcular y evaluar las funciones y polinomios
@@ -175,9 +183,12 @@ def setGraph(a_ui, b_ui, n_ui, g1_ui, g2_ui, g3_ui, funcs_ui):
   ax.set_xlim(min(x), max(x))
   ax.grid(True)
 
+  # Dibujo del canva nuevo
   current_canvas = FigureCanvasTkAgg(fig, master=root)
   current_canvas.draw()
   current_canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+
+  ### Fin de la función ###
 
 
 ## Ventana principal ##
@@ -187,7 +198,7 @@ root.wm_title("Polinomios de Taylor y McLaurin")
 titulo = tk.Label(root, text="Polinomios de Taylor y McLaurin", font=("Arial", 20))
 titulo.pack(pady=10, side=tk.TOP)
 
-## Definición de Variables ##
+## Definición de variables de Tkinter##
 a_ui = tk.StringVar(value="")
 b_ui = tk.StringVar(value="")
 n_ui = tk.StringVar(value="")
@@ -203,40 +214,40 @@ opciones.pack(padx=20, pady=10, side=tk.RIGHT)
 # Campos de texto para introducir los grados
 etiqueta2 = tk.Label(opciones, text="Grados")
 etiqueta2.pack(padx=10)
-grad1 = tk.Entry(opciones, width=20, textvariable=g1_ui)
+grad1 = tk.Entry(opciones, width=25, textvariable=g1_ui)
 grad1.pack(padx=10, pady=2)
-grad2 = tk.Entry(opciones, width=20, textvariable=g2_ui)
+grad2 = tk.Entry(opciones, width=25, textvariable=g2_ui)
 grad2.pack(padx=10, pady=2)
-grad3 = tk.Entry(opciones, width=20, textvariable=g3_ui)
+grad3 = tk.Entry(opciones, width=25, textvariable=g3_ui)
 grad3.pack(padx=10, pady=2)
 
 # Campos de texto para los puntos [a, b] de la evaluación
 etiqueta3 = tk.Label(opciones, text="Puntos de la recta [a, b]")
 etiqueta3.pack(padx=10)
-punto1 = tk.Entry(opciones, width=20, textvariable=a_ui)
+punto1 = tk.Entry(opciones, width=25, textvariable=a_ui)
 punto1.pack(padx=10, pady=2)
-punto2 = tk.Entry(opciones, width=20, textvariable=b_ui)
+punto2 = tk.Entry(opciones, width=25, textvariable=b_ui)
 punto2.pack(padx=10, pady=2)
 
 # Cantidad de puntos a Evaluar
 etiqueta5 = tk.Label(opciones, text="Cantidad de puntos")
 etiqueta5.pack(padx=10)
-pts = tk.Entry(opciones, width=20, textvariable=n_ui)
+pts = tk.Entry(opciones, width=25, textvariable=n_ui)
 pts.pack(padx=10, pady=2)
 
 # Lista de las funciones disponibles
 etiqueta = tk.Label(opciones, text="Funciones")
 etiqueta.pack(padx=10)
 opc = tk.StringVar(value="")
-funcs = tk.Listbox(opciones, selectmode=tk.SINGLE, width=20, height=5, listvariable=opc)
+funcs = tk.Listbox(opciones, selectmode=tk.SINGLE, width=25, height=5, listvariable=opc)
 funcs.pack(padx=10, pady=2)
 
 # Llenado de la lista de funciones
-for item in ["Exponente", "Exponente ^-", "Seno", "Coseno", "Seno Hiperbolico", "Coseno Hiperbolico", "Logaritmo natural"]:
-  funcs.insert(tk.END, item, )
+for item in ["Exponente: e^x", "Exponente: e^-x", "Seno: sen(x)", "Coseno: cos(x)", "Seno hiperbólico: senh(x)", "Coseno hiperbólico: cosh(x)", "Logaritmo natural: ln(1+x)"]:
+  funcs.insert(tk.END, item)
 
 # Boton que realiza el cálculo
-calc = tk.Button(opciones, text="Calcular", width=15,command=lambda:setGraph(a_ui, b_ui, n_ui, g1_ui, g2_ui, g3_ui, funcs) )
+calc = tk.Button(opciones, text="Calcular", width=20,command=lambda:setGraph(a_ui, b_ui, n_ui, g1_ui, g2_ui, g3_ui, funcs) )
 calc.pack(padx=20, pady=10)
 
 # Inicio de la ventana maximizada
