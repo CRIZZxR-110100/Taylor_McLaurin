@@ -1,9 +1,11 @@
 from numpy import linspace as arr
 import math as m
 import tkinter as tk
-
+from tkinter import messagebox as msg
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
+
+current_canvas = None
 
 def serie(x, grado, tipo):
   y = []
@@ -13,8 +15,7 @@ def serie(x, grado, tipo):
     for i in x:
       y_temp = 0
       for j in range(0, (grado+1)):
-        # Agregar polinomio de Taylor
-        print()
+        y_temp += ( i**j )/m.factorial(j)
       y.append(y_temp)
     return y
 
@@ -23,8 +24,7 @@ def serie(x, grado, tipo):
     for i in x:
       y_temp = 0
       for j in range(0, (grado+1)):
-        # Agregar polinomio de Taylor
-        print()
+        y_temp += ((-i)**j)/ m.factorial(j)
       y.append(y_temp)
     return y
 
@@ -33,7 +33,7 @@ def serie(x, grado, tipo):
     for i in x:
       y_temp = 0
       for j in range(0, (grado+1)):
-        y_temp += ((-1)**j) * ((i**(2*j+1))/(m.factorial(2*j+1)))
+        y_temp += (((-1)**j) * ((i**(2*j+1))/(m.factorial(2*j+1))))
       y.append(y_temp)
     return y
 
@@ -42,8 +42,7 @@ def serie(x, grado, tipo):
     for i in x:
       y_temp = 0
       for j in range(0, (grado+1)):
-        # Agregar polinomio de Taylor
-        print()
+        y_temp += ((-1)**j) * ((i**(2*j))/(m.factorial(2*j)))
       y.append(y_temp)
     return y
 
@@ -52,8 +51,7 @@ def serie(x, grado, tipo):
     for i in x:
       y_temp = 0
       for j in range(0, (grado+1)):
-        # Agregar polinomio de Taylor
-        print()
+        y_temp += ( i**(2*j+1) )/m.factorial(2*j+1)
       y.append(y_temp)
     return y
 
@@ -62,8 +60,7 @@ def serie(x, grado, tipo):
     for i in x:
       y_temp = 0
       for j in range(0, (grado+1)):
-        # Agregar polinomio de Taylor
-        print()
+        y_temp += (i**(2*j))/m.factorial(2*j)
       y.append(y_temp)
     return y
 
@@ -71,10 +68,10 @@ def serie(x, grado, tipo):
   if (tipo == 6):
     for i in x:
       y_temp = 0
-      for j in range(0, (grado+1)):
-        # Agregar polinomio de Taylor
-        print()
+      for j in range(1, (grado+1)):
+        y_temp += (((-1)**(j+1))*(i**j))/j
       y.append(y_temp)
+      print(y_temp)
     return y
 
 def calcReal(x, tipo):
@@ -123,22 +120,19 @@ def calcReal(x, tipo):
     return y
 
 def setGraph(a_ui, b_ui, n_ui, g1_ui, g2_ui, g3_ui, funcs_ui):
-  a = float(0)
-  b = float(0)
-  n = int(0)
-  g1 = int(0)
-  g2 = int(0)
-  g3 = int(0)
+  global current_canvas  
 
-  opc = int(0)
+  a, b, n, g1, g2, g3, opc = float(0), float(0), int(0), int(0), int(0), int(0), int(0)
+
+  err = 0
 
   try:
     if funcs_ui.curselection():
       opc = funcs_ui.curselection()[0]
+      print(opc)
     else:
-      tk.messagebox.showerror("Error", "No selecciono una función")
-      print("Error: Función no seleccionada")
-      return
+      tk.messagebox.showerror("Error", "Seleccione una función válida de la lista de las funciones disponibles")
+      err += 1
 
     a = float(a_ui.get())
     b = float(b_ui.get())
@@ -148,48 +142,50 @@ def setGraph(a_ui, b_ui, n_ui, g1_ui, g2_ui, g3_ui, funcs_ui):
     g3 = int(g3_ui.get())
 
   except ValueError:
-    tk.messagebox.showerror("Error", "Ingrese un número válido")
-    print("Error: Ingrese un número válido")
-    return
+    tk.messagebox.showerror("Error", "Ingrese un número válido en los campos:\n• Los 3 grados de los polinomios y la cantidad de puntos son valores enteros.\n• Los puntos de inicio y final a evaluar pueden ser numero de punto flotante\n• No pueden haber campos vacios")
+    err += 1
 
-  if (opc < 0 or opc > 6):
-    tk.messagebox.showerror("Error", "Seleccione una función")
-    print("Error: Seleccione una función")
+  if err != 0:
     return
   
-  x = arr(a , b, n)
-  y1 = serie(x, g1, opc)
-  y2 = serie(x, g2, opc)
-  y3 = serie(x, g3, opc)
-
+  if opc == 6 and (a <= -1 or b <= -1):
+    tk.messagebox.showerror("Error", "La función ln(1+x) no puede ser evaluada en números negativos")
+    return
+  
+  # Calcular y evaluar las funciones y polinomios
+  x = arr(a, b, n)
+  y1, y2, y3 = serie(x, g1, opc), serie(x, g2, opc), serie(x, g3, opc)
   org = calcReal(x, opc)
   
+  # Destruir el canvas anterior si existe
+  if current_canvas is not None:
+    current_canvas.get_tk_widget().destroy()
+  
+  # Creación de la gráfica
   fig = Figure(figsize=(5, 4), dpi=100)
   ax = fig.add_subplot(111)
-
-  ax.plot(x, org, color="orange", label="f(x)")
-
   ax.plot(x, y1, color="green", label=f"T{g1}(x)")
   ax.plot(x, y2, color="blue", label=f"T{g2}(x)")
   ax.plot(x, y3, color="red", label=f"T{g3}(x)")
-
+  ax.plot(x, org, color="orange", label="f(x)")
   ax.legend(loc="upper right", fontsize="small")
-
-  ax.set_title("Pólinomios de Taylor y McLaurin")
   ax.set_xlabel("x")
   ax.set_ylabel("y")
-  ax.set_ylim(min(org)-2 , max(org)+2)
+  ax.set_ylim((min(org)-(max(org)*0.25)), (max(org)*1.25))
   ax.set_xlim(min(x), max(x))
   ax.grid(True)
 
-  canvas = FigureCanvasTkAgg(fig, master=root)
-  canvas.draw()
-  canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+  current_canvas = FigureCanvasTkAgg(fig, master=root)
+  current_canvas.draw()
+  current_canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
 
 ## Ventana principal ##
 root = tk.Tk()
-root.wm_title("Plinomios de Taylor y McLaurin")
+root.wm_title("Polinomios de Taylor y McLaurin")
+
+titulo = tk.Label(root, text="Polinomios de Taylor y McLaurin", font=("Arial", 20))
+titulo.pack(pady=10, side=tk.TOP)
 
 ## Definición de Variables ##
 a_ui = tk.StringVar(value="")
