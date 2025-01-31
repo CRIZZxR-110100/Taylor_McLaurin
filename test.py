@@ -73,7 +73,6 @@ def serie(x, grado, tipo):
       for j in range(1, (grado+1)):
         y_temp += (((-1)**(j+1))*(i**j))/j
       y.append(y_temp)
-      print(y_temp)
     return y
   
   ### Fin de la función ###
@@ -137,7 +136,6 @@ def setGraph(a_ui, b_ui, n_ui, g1_ui, g2_ui, g3_ui, funcs_ui):
   try:
     if funcs_ui.curselection():
       opc = funcs_ui.curselection()[0]
-      print(opc)
     else:
       tk.messagebox.showerror("Error", "Seleccione una función válida de la lista de las funciones disponibles")
       err += 1
@@ -169,9 +167,15 @@ def setGraph(a_ui, b_ui, n_ui, g1_ui, g2_ui, g3_ui, funcs_ui):
   if current_canvas is not None:
     current_canvas.get_tk_widget().destroy()
   
+  limY = [min(org)-(max(org)*0.25), max(org)*1.25]
+
   # Creación de la gráfica
   fig = Figure(figsize=(5, 4), dpi=100)
   ax = fig.add_subplot(111)
+
+  ax.plot([min(x), max(x)], [0, 0], color="black", linewidth=1)
+  ax.plot([0, 0], limY, color="black", linewidth=1)
+
   ax.plot(x, y1, color="green", label=f"T{g1}(x)")
   ax.plot(x, y2, color="blue", label=f"T{g2}(x)")
   ax.plot(x, y3, color="red", label=f"T{g3}(x)")
@@ -179,9 +183,9 @@ def setGraph(a_ui, b_ui, n_ui, g1_ui, g2_ui, g3_ui, funcs_ui):
   ax.legend(loc="upper right", fontsize="small")
   ax.set_xlabel("x")
   ax.set_ylabel("y")
-  ax.set_ylim((min(org)-(max(org)*0.25)), (max(org)*1.25))
+  ax.set_ylim(limY[0], limY[1])
   ax.set_xlim(min(x), max(x))
-  ax.grid(True)
+  ax.grid(which="major", linestyle="dashed")
 
   # Dibujo del canva nuevo
   current_canvas = FigureCanvasTkAgg(fig, master=root)
@@ -212,7 +216,7 @@ opciones = tk.Frame(root, width=300, height=450, borderwidth=2, relief="sunken")
 opciones.pack(padx=20, pady=10, side=tk.RIGHT)
 
 # Campos de texto para introducir los grados
-etiqueta2 = tk.Label(opciones, text="Grados")
+etiqueta2 = tk.Label(opciones, text="Grados de los polinomios")
 etiqueta2.pack(padx=10)
 grad1 = tk.Entry(opciones, width=25, textvariable=g1_ui)
 grad1.pack(padx=10, pady=2)
